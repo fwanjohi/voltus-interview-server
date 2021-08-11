@@ -6,9 +6,11 @@ const port = process.env.PORT || '3000';
 
 app.get('/', (req, res) => {
 
-    res.send('Your FESTUS crazy Express API is up and running!');
+    res.send('Your Express API is up and running!');
 
 });
+
+
 
 app.listen(port, () => {
 
