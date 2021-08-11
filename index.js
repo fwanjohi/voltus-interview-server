@@ -10,6 +10,14 @@ app.get('/', (req, res) => {
 
 });
 
+app.get('/customer', (req, res) => {
+
+    res.send('Your Express API is up and running!');
+
+});
+
+
+
 
 
 app.listen(port, () => {
