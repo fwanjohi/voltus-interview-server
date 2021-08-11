@@ -6,13 +6,13 @@ const port = process.env.PORT || '3000';
 
 app.get('/', (req, res) => {
 
-    res.send('Your Express API is up and running!');
+    res.send('Mesed up again!!');
 
 });
 
 app.get('/customer', (req, res) => {
 
-    res.send('{name: "festus"}');
+    res.send('{name: "festus-mess"}');
 
 });
 
