@@ -160,9 +160,8 @@ exports.getProgramCustomers = function (id, callBack) {
     });
 }
 
-exports.getDispatchesForCustomer = function(cid, callBack){
-    let custId = parseInt(cid);
-    
+exports.getDispatchesForCustomer = function (query, callBack) {
+
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
             console.error('ERROR connecting:', err);
@@ -170,16 +169,16 @@ exports.getDispatchesForCustomer = function(cid, callBack){
         }
 
         const dbo = db.db(dbName);
-        const query = { customerId: custId };
+
         dbo.collection("dispatches").find(query).toArray(function (err, result) {
 
             if (err) {
                 console.error('Error getting customer: ', err);
-               
+
                 callBack([]);
             } else {
                 callBack(result);
-                
+
             }
 
         });
@@ -211,6 +210,7 @@ exports.createNewIncident = function (corId, incident, callBack) {
 }
 
 exports.createDispatch = function (corId, dispatch) {
+    dispatch.hasBeenAcknowledged = false;
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
             Logger.logError(corId, error);
@@ -238,7 +238,7 @@ exports.createDbLog = function (log) {
             return;
         }
         const dbo = db.db(dbName);
-        
+
         dbo.collection("logs").insertOne(log, function (err, res) {
             if (err) {
                 //NOTE : USE OTHER MEANS TO LOG DB ERRORS
@@ -258,8 +258,8 @@ exports.updateDispatchAcknowledgement = function (corId, ack, callBack) {
         }
         const dbo = db.db(dbName);
         const query = { _id: ack._id };
-        var newvalues = { $set: {hasBeenAcknowledged: true, acknowledgebBy: ack.ackBy, acknowledgeOn : ack.ackTime } };
-        
+        var newvalues = { $set: { hasBeenAcknowledged: true, acknowledgebBy: ack.ackBy, acknowledgeOn: ack.ackTime } };
+
         dbo.collection("dispatches").updateOne(query, newvalues, function (err, res) {
             if (err) {
                 Logger.logError(corId, error);
@@ -294,7 +294,7 @@ exports.purge = function (all) {
         dbo.collection("incidents").deleteMany({}, function (err, res) {
         });
 
-        if (all){
+        if (all) {
             console.log("purging programs and customer tables");
             dbo.collection("programs").deleteMany({}, function (err, res) {
             });

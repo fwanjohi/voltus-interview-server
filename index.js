@@ -29,9 +29,15 @@ app.use(express.json())
 
 const server = http.createServer(app);
 
+const io = require('socket.io')(server, {
+    cors: {
+        origins: ['http://localhost:4200']
+    }
+});
+
 app.get('/', (req, res) => {
 
-    res.send('SERVER DEPLOY - All code except IO at ' + host.hostname);
+    res.send('Server Running OK...');
 
 });
 
@@ -77,9 +83,24 @@ app.get('/dispatch/customer', (req, res) => {
     var q = urlParse(req.url, true).query;
     if (!q || !q.cid) {
         res.status(400).end();
+        return;
     }
 
-    repository.getDispatchesForCustomer(q.cid, (val) => {
+    let custId = parseInt(q.cid)
+
+    if (!q || !q.status) {
+        res.status(400).end();
+        return;
+    }
+
+    let query = { customerId: custId };
+    if (q.status == 'new') {
+        query.hasBeenAcknowledged = false;
+    }
+
+
+
+    repository.getDispatchesForCustomer(query, (val) => {
         //console.log("programCustomers", val);
         res.send(val);
     });
@@ -112,9 +133,39 @@ app.delete('/purge', (req, res) => {
 app.listen(port, () => {
 
     console.log(`listening at http://localhost:${port}`);
-    console.log('listening on *:3000');
     console.log("calling repository");
     repository.createPrograms();
     repository.createCustomers();
 
 });
+
+
+//WebSocket Hookup for direct connection
+io.on('connection', (socket) => {
+    console.log('a user connected', socket.id);
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+
+    socket.on('handshake', (userId) => {
+        console.log('User : ' + userId + 'says hello');
+    });
+
+    socket.on('acknowledge', (ack) => {
+        console.log('Acknlowledgement Received', ack);
+        let corId = utils.createUUID();
+        repository.updateDispatchAcknowledgement(corId, ack, (success) => {
+
+            let log = {
+                datalogType: "dispatch-ack",
+                id: ack._id,
+                data: ack,
+                success: success
+            }
+
+            ack["success"] = success;
+            logger.logAudit(corId, log);
+            socket.emit('acknowledge-update', [ack]);
+        });
+    });
+})
