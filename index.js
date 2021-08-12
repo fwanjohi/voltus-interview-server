@@ -142,7 +142,18 @@ server.listen(port, () => {
 
 //WebSocket Hookup for direct connection
 io.on('connection', (socket) => {
-    console.log('a user connected', socket.id);
+
+    const corId = utils.createUUID();
+    console.log('a user connected: ' + corId, socket.id);
+    let log = {
+        datalogType: "connect",
+        id: socket.id,
+        //data: socket,
+        success: true
+    }
+
+
+    logger.logAudit(corId, log);
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
