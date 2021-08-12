@@ -130,7 +130,7 @@ app.delete('/purge', (req, res) => {
 });
 
 
-app.listen(port, () => {
+server.listen(port, () => {
 
     console.log(`listening at http://localhost:${port}`);
     console.log("calling repository");
