@@ -38,25 +38,20 @@ const io = require('socket.io')(server, {
     },
 });
 
+var globalSocket;
+
 app.get('/', (req, res) => {
     const config = getServerConfig()
 
-    let msg = 'Server Running OK... ' + 'at ' + config.ip + ':' + config.port;
+    let msg = 'Fx-Voltus Dispather Server Running OK...at ' + config.ip + ':' + config.port;
     console.log(msg);
-    res.send(config);
+    res.send(msg);
 
 });
 
 app.get('/config', (req, res) => {
     const results = getServerConfig();
     res.send(results);
-
-});
-
-
-app.get('/test', (req, res) => {
-
-    res.send('{name: "festus-mess"}');
 
 });
 
@@ -131,10 +126,16 @@ app.post('/incident', (req, res) => {
         console.log("incident created", val);
         dispatcher.dispatchIncident(correlationId, val);
         res.send(val);
+
+        //to all other clients
+        globalSocket.broadcast.emit('new-dispatch', ack);
+
+        // to sender
+        globalSocket.emit('new-dispatch', ack);
     });
 });
 
-//
+// For Personal Use.... 
 app.delete('/purge', (req, res) => {
     var q = urlParse(req.url, true).query;
     let all = (q && q.all && q.all == 1);
@@ -158,6 +159,7 @@ io.on('connection', (socket) => {
 
     const corId = utils.createUUID();
     console.log('a user connected: ' + corId, socket.id);
+    globalSocket = socket;
     let log = {
         datalogType: "connect",
         id: socket.id,
