@@ -210,7 +210,7 @@ function getServerConfig() {
                 }
                 results[name].push(net.address);
 
-                if (name == "vEthernet (WSL)") {
+                if (name == "vEthernet (WSL)" || name == "eth0") {
                     results['ip'] = net.address;
                 }
 
