@@ -40,9 +40,10 @@ const io = require('socket.io')(server, {
 
 app.get('/', (req, res) => {
     const config = getServerConfig()
+
     let msg = 'Server Running OK... ' + 'at ' + config.ip + ':' + config.port;
     console.log(msg);
-    res.send(msg);
+    res.send(config);
 
 });
 
