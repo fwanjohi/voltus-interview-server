@@ -14,6 +14,7 @@ const utils = require('./services/utils');
 const logger = require('./services/logger');
 const cors = require('cors');
 const host = require('os');
+const { config } = require('dotenv');
 
 const app = express();
 app.use(cors());
@@ -38,42 +39,15 @@ const io = require('socket.io')(server, {
 });
 
 app.get('/', (req, res) => {
-
-    res.send('Server Running OK...');
+    const config = getServerConfig()
+    let msg = 'Server Running OK... ' + 'at ' + config.ip + ':' + config.port;
+    console.log(msg);
+    res.send(msg);
 
 });
 
 app.get('/config', (req, res) => {
-    //const ip = require("ip");
-    const { networkInterfaces } = require('os');
-
-    const nets = networkInterfaces();
-    const results = Object.create(null); // Or just '{}', an empty object
-
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-            if (net.family === 'IPv4' && !net.internal) {
-
-                if (!results[name]) {
-                    results[name] = [];
-                }
-                results[name].push(net.address);
-
-
-
-                if (name == "vEthernet (WSL)") {
-                    results['ip'] = net.address;
-                }
-
-            }
-        }
-    }
-    results["port"] = port;
-    // const config = {
-    //     port: port,
-    //     ip: ip
-    // };
+    const results = getServerConfig();
     res.send(results);
 
 });
@@ -191,7 +165,7 @@ io.on('connection', (socket) => {
     }
 
 
-    logger.logAudit(corId, log);
+    logger.logItem(log);
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
@@ -218,3 +192,37 @@ io.on('connection', (socket) => {
         });
     });
 })
+
+function getServerConfig() {
+    const { networkInterfaces } = require('os');
+
+    const nets = networkInterfaces();
+    const results = Object.create(null); // Or just '{}', an empty object
+
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+            if (net.family === 'IPv4' && !net.internal) {
+
+                if (!results[name]) {
+                    results[name] = [];
+                }
+                results[name].push(net.address);
+
+                if (name == "vEthernet (WSL)") {
+                    results['ip'] = net.address;
+                }
+
+
+            }
+        }
+    }
+    results["port"] = port;
+    return results;
+
+}
+
+
+app.get('/test', (req, res) => {
+
+});

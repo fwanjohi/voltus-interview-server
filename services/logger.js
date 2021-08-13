@@ -1,3 +1,4 @@
+const { Logger } = require('mongodb');
 const repository = require('./repository');
 
 exports.logError = function (correlationId, message, error) {
@@ -21,5 +22,12 @@ exports.logAudit = function (correlationId, audit) {
         message: audit,
     }
     repository.createDbLog(log);
+
+}
+
+
+exports.logItem = function (item) {
+    console.log('logging item:', item);
+    repository.createDbLog(item);
 
 }
