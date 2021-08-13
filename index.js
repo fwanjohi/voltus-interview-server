@@ -33,7 +33,7 @@ const server = http.createServer(app);
 const io = require('socket.io')(server, {
     cors: {
         //origins: ['http://localhost:4200', '*']
-        origins: ['*'],
+        origins: ['*', 'http://localhost:4200'],
         transports: ['websocket']
     },
 });
@@ -189,7 +189,12 @@ io.on('connection', (socket) => {
 
             ack["success"] = success;
             logger.logAudit(corId, log);
-            socket.emit('acknowledge-update', [ack]);
+
+            //to all other clients
+            socket.broadcast.emit('acknowledge-update', ack);
+
+            // to sender
+            socket.emit('acknowledge-update', ack);
         });
     });
 })
