@@ -25,15 +25,16 @@ app.use(
 )
 
 app.use(express.json())
-//app.set('port', process.env.PORT || 3000);
+app.use(express.static('public'));
 
 const server = http.createServer(app);
 //const io = require('socket.io')(server);
 const io = require('socket.io')(server, {
     cors: {
         //origins: ['http://localhost:4200', '*']
-        origins: ['*']
-    }
+        origins: ['*'],
+        transports: ['websocket']
+    },
 });
 
 app.get('/', (req, res) => {
