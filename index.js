@@ -48,8 +48,8 @@ app.get('/', (req, res) => {
     res.send(msg);
 
 });
-
-app.get('/config', (req, res) => {
+// get Server API Config
+app.get(, '/config'(req, res) => {
     const results = getServerConfig();
     res.send(results);
 
@@ -118,6 +118,7 @@ app.get('/dispatch/customer', (req, res) => {
 
 //Creates an incident for a program
 app.post('/incident', (req, res) => {
+
     var incident = req.body;
 
     let correlationId = utils.createUUID();
