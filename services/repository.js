@@ -4,13 +4,14 @@ const connectUrl = "mongodb+srv://admin:fxiAdmin8522@fxicluster.uh3gu.mongodb.ne
 const dbName = "voltus";
 var ObjectId = require('mongodb').ObjectID;
 
-//DUMMY CUSTOMERS --
+/**
+ * DUMMY PROGRAMS --
+ */
 exports.createCustomers = function () {
     console.log('creating customers')
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
-            console.error('ERROR connecting:', err);
-            return;
+            utils.createDbError(err);
         }
 
         const dbo = db.db(dbName);
@@ -48,7 +49,10 @@ exports.createCustomers = function () {
     });
 }
 
-//DUMMY PROGRAMS -- 
+// 
+/**
+ * Internal: Creates DUMMY PROGRAMS --
+ */
 exports.createPrograms = function () {
     console.log('creating programs')
     MongoClient.connect(connectUrl, function (err, db) {
@@ -91,12 +95,18 @@ exports.createPrograms = function () {
 }
 
 
+/**
+ * 
+ * @param {*} id 
+ * @param {*} callBack 
+ */
 exports.getCustomerById = function (id, callBack) {
     custId = parseInt(id);
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
-            console.error('ERROR connecting:', err);
-            callBack([]);
+            let dbErr = utils.createDbError(err);
+            console.log("a database error has happened", dbErr);
+            return callBack(dbErr);
         }
 
         const dbo = db.db(dbName);
@@ -119,14 +129,20 @@ exports.getCustomerById = function (id, callBack) {
     });
 
 }
-
+/**
+ * 
+ * @param {*} id 
+ * @param {*} callBack 
+ */
 exports.getProgramCustomers = function (id, callBack) {
     let progId = parseInt(id);
     let program = undefined;
+
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
-            console.error('ERROR connecting:', err);
-            callBack([]);
+            let dbErr = utils.createDbError(err);
+            console.log("a database error has happened", dbErr);
+            return callBack(dbErr);
         }
 
         const dbo = db.db(dbName);
@@ -159,13 +175,18 @@ exports.getProgramCustomers = function (id, callBack) {
 
     });
 }
-
+/**
+ * 
+ * @param {*} query 
+ * @param {*} callBack 
+ */
 exports.getDispatchesForCustomer = function (query, callBack) {
 
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
-            console.error('ERROR connecting:', err);
-            callBack([]);
+            let dbErr = utils.createDbError(err);
+            console.log("a database error has happened", dbErr);
+            return callBack(dbErr);
         }
 
         const dbo = db.db(dbName);
@@ -187,11 +208,18 @@ exports.getDispatchesForCustomer = function (query, callBack) {
     });
 }
 
+/**
+ * Creates a new entry in the Incidents Database
+ * @param {*} corId since this is a transactional call, we need to track it in all logs
+ * @param {*} incident the incident to be created
+ * @param {*} callBack callback function after update
+ */
 exports.createNewIncident = function (corId, incident, callBack) {
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
-            Logger.logError(corId, error);
-            callBack(undefined);
+            let dbErr = utils.createDbError(err);
+            console.log("a database error has happened", dbErr);
+            return callBack(dbErr);
         }
         const dbo = db.db(dbName);
         incident.createdOn = new Date().toUTCString();
@@ -208,14 +236,18 @@ exports.createNewIncident = function (corId, incident, callBack) {
     });
 
 }
-
+/**
+ * Creates a dispatch entry in the Database
+ * @param {*} corId since this is a transactional call, we need to track it in all logs
+ * @param {*} dispatch the Dispatch to be created
+ */
 exports.createDispatch = function (corId, dispatch) {
     dispatch.hasBeenAcknowledged = false;
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
             Logger.logError(corId, error);
-
         }
+
         const dbo = db.db(dbName);
         dispatch.createdOn = new Date().toUTCString();
         dispatch._id = utils.createUUID();
@@ -228,7 +260,10 @@ exports.createDispatch = function (corId, dispatch) {
     });
 }
 
-//VERY SENSITIVE HERE...
+/**
+ * This is a very critical method. If the DB Log fails, use other means to log the error
+ * @param {*} log the data to be logged
+ */
 exports.createDbLog = function (log) {
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
@@ -250,6 +285,12 @@ exports.createDbLog = function (log) {
     });
 }
 
+/**
+ * 
+ * @param {*} corId since this is a transactional call, we need to track it in all logs
+ * @param {*} ack status of the acknowledgement
+ * @param {*} callBack callback function for the update
+ */
 exports.updateDispatchAcknowledgement = function (corId, ack, callBack) {
     MongoClient.connect(connectUrl, function (err, db) {
         if (err) {
@@ -275,7 +316,10 @@ exports.updateDispatchAcknowledgement = function (corId, ack, callBack) {
 }
 
 
-//ONLY FOR USE BY THE FESTUS....!!! :)
+/**
+ * Internal use only
+ * @param {*} all the tables to purge
+ */
 exports.purge = function (all) {
     console.log("purging transactional tables");
     MongoClient.connect(connectUrl, function (err, db) {

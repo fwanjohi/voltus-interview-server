@@ -16,6 +16,7 @@ const cors = require('cors');
 const host = require('os');
 const path = require('path');
 const { config } = require('dotenv');
+const runAsync = require('express-async-handler')
 
 const app = express();
 app.use(cors());
@@ -28,14 +29,11 @@ app.use(
 
 app.use(express.json())
 app.use(express.static('public'));
-// app.set("views", path.join(__dirname))
-// app.set("view engine", "ejs")
 
 const server = http.createServer(app);
-//const io = require('socket.io')(server);
+
 const io = require('socket.io')(server, {
     cors: {
-        //origins: ['http://localhost:4200', '*']
         origins: ['*', 'http://localhost:4200'],
         transports: ['websocket']
     },
@@ -43,42 +41,58 @@ const io = require('socket.io')(server, {
 
 var globalSocket;
 
-// app.param('name', function (req, res, next, name) {
-//     const modified = name.toUpperCase();
+/**
+ * 
+ * @param {*} res response object
+ * @param {*} data data to be sent to the response object
+ */
+function sendGenericResponse(res, data) {
 
-//     req.name = modified;
-//     next();
-// });
+    if (data.statusCode === 500) {
+        res.status(500).send("An Error has occured. Please contact your system administrator");
+    } else {
 
+        res.status(res.statusCode).send(data.message ?? data);
+    }
+}
+
+/**
+ * status of the server
+ */
 app.get('/', (req, res) => {
     const config = getServerConfig()
 
     let msg = 'Fx-Voltus Dispather Server Running OK...at ' + config.ip + ':' + config.port;
-    console.log(msg);
-    res.send(msg);
+    res.status(200).send(msg);
 
 });
-// get Server API Config
+
+/**
+ * get Server API Config
+ */
 app.get('/config', (req, res) => {
     const results = getServerConfig();
-    res.send(results);
+    sendGenericResponse(res, results);
 
 });
 
-//get a specific customer
+/**
+ * get a specific customer 
+ */
 app.get('/customer/:id', (req, res) => {
 
-    console.log("params=>", req.params);
-    var custId = req.params.id;
-
-    repository.getCustomerById(custId, (val) => {
-        console.log("=================", val);
-        res.send(val);
+    //console.log("params=>", req.params);
+    var params = req.params;
+    repository.getCustomerById(params.id, (val) => {
+        sendGenericResponse(res, val);
     });
 
 });
 
-//gets all a program and all its customers
+/**
+ * gets all a program and all its customers
+ */
+
 app.get('/program/:id/customer', (req, res) => {
 
     var params = req.params;
@@ -88,13 +102,16 @@ app.get('/program/:id/customer', (req, res) => {
     }
 
     repository.getProgramCustomers(params.id, (val) => {
-        //console.log("programCustomers", val);
-        res.send(val);
+        // //console.log("programCustomers", val);
+        // res.send(val);
+        sendGenericResponse(res, val);
     });
 
 });
 
-//gets all dispatches for a customer
+/**
+ * gets all dispatches for a customer
+ */
 app.get('/dispatch/customer/:id', (req, res) => {
 
     var params = req.params;
@@ -107,14 +124,17 @@ app.get('/dispatch/customer/:id', (req, res) => {
 
     repository.getDispatchesForCustomer(query, (val) => {
         //console.log("programCustomers", val);
-        res.send(val);
+        sendGenericResponse(res, val);
     });
 
 });
 
-//gets all dispatch that involve a customer
-//:id - customer Id
-//ack - acknowledged or not
+/**
+gets all dispatch that involve a customer
+id - customer Id
+ack - acknowledged : true||false
+ */
+
 app.get('/dispatch/customer/:id/:ack', (req, res) => {
 
     var params = req.params;
@@ -131,13 +151,15 @@ app.get('/dispatch/customer/:id/:ack', (req, res) => {
 
     repository.getDispatchesForCustomer(query, (val) => {
         //console.log("programCustomers", val);
-        res.status(200).end(val);
+        sendGenericResponse(res, val);
     });
 
 });
 
 
-//Creates an incident for a program
+/**
+ * Creates an incident for a program
+ */
 app.post('/incident', (req, res) => {
 
     var incident = req.body;
@@ -147,17 +169,21 @@ app.post('/incident', (req, res) => {
     repository.createNewIncident(correlationId, incident, (val) => {
         console.log("incident created", val);
         dispatcher.dispatchIncident(correlationId, val);
-        res.send(val);
+        sendGenericResponse(res, val);
 
-        //to all other clients
-        globalSocket.broadcast.emit('new-dispatch', ack);
+        if (globalSocket) {
+            //to all other clients
+            globalSocket.broadcast.emit('new-dispatch', ack);
 
-        // to sender
-        globalSocket.emit('new-dispatch', ack);
+            // to sender
+            globalSocket.emit('new-dispatch', ack);
+        }
     });
 });
 
-// For Personal Use.... 
+/**
+ * For Personal Use....
+*/
 app.delete('/purge', (req, res) => {
     var q = urlParse(req.url, true).query;
     let all = (q && q.all && q.all == 1);
@@ -165,18 +191,19 @@ app.delete('/purge', (req, res) => {
     res.end();
 });
 
-
+/**
+ * initiate the server
+ */
 server.listen(port, () => {
 
     console.log(`listening at http://localhost:${port}`);
     console.log("calling repository");
-    repository.createPrograms();
-    repository.createCustomers();
-
 });
 
 
-//WebSocket Hookup for direct connection
+/**
+ * WebSocket Hookup for direct connection
+ */
 io.on('connection', (socket) => {
 
     const corId = utils.createUUID();
@@ -188,15 +215,15 @@ io.on('connection', (socket) => {
         //data: socket,
         success: true
     }
-
-
     logger.logItem(log);
+
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
 
     socket.on('handshake', (userId) => {
-        console.log('User : ' + userId + 'says hello');
+        console.log('User : ' + userId + 'says ha connected');
     });
 
     socket.on('acknowledge', (ack) => {
@@ -223,10 +250,10 @@ io.on('connection', (socket) => {
     });
 })
 
-function sendResponse(res, data) {
-    res.status(data.statusCode).end(data.message);
-}
-
+/**
+ * 
+ * @returns Configuration for the server
+ */
 function getServerConfig() {
     const { networkInterfaces } = require('os');
 
@@ -255,8 +282,3 @@ function getServerConfig() {
     return results;
 
 }
-
-
-app.get('/test', (req, res) => {
-
-});

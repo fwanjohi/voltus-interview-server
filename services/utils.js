@@ -7,11 +7,30 @@ exports.createUUID = function () {
    });
 }
 
-exports.createResponse = function (status, message) {
+exports.createResponse = function (statusCode, message) {
    return {
-      status: status,
+      statusCode: status,
       message: message
    }
+}
+
+exports.createDbError = function (err) {
+
+   const dbErr = {
+      dbCode: err.code,
+      codeName: err.codeName,
+      message: err.message,
+      stack: err.stack
+   };
+
+   let ErrStatus = {
+      statusCode: 500,
+      message: dbErr
+
+   };
+
+   return ErrStatus;
+
 }
 
 
