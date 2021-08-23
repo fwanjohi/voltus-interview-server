@@ -1,4 +1,4 @@
-# Voltus Dispatcher Interview
+# Voltus Dispatcher Interview - Updated
 
 ## Overview
 I created two projects to demonstrate the workings of my solution
@@ -260,6 +260,9 @@ Io.on(‘acknowledge’)
     - connectUrl : **"mongodb+srv://admin:fxiAdmin8522@fxicluster.uh3gu.mongodb.net/";**
     - database name : **voltus**
 	- Can be switched for any DBEngine 
+- To test for Error conditions : change the connectionUrl to something completely invalid
+	- connectUrl : **"mongodb+srv://adminFake:fxiAdmin8522Fake@fxicluster.uh3gu.mongodb.net/";**
+	- In this scenario, all calls will return **500 : "An Error has occured. Please contact your system administrator"**
 
 ### Collections
 #### Programs 
@@ -327,10 +330,10 @@ Io.on(‘acknowledge’)
 ```
 
 ## NOTES:
--	Did not implement Authentication/Authorization – Assumption that any system will have that
+-	Did not implement Authentication/Authorization – **Assumption that any system will have that**
 -	Did the UI just to show **REAL-TIME Updates for acknowledgment** 
 -	Created only CRUD endpoints necessary for the Take home (Some methods were added for convinience using postman)
--	Did not manage to get CI/CD working (bummer)
+-	Did not manage to get CI/CD working (bummer) **working on Docker Images**
 -	Could not deploy UI to the cloud (another bummer)
 
 ## Summary:
