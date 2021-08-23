@@ -180,7 +180,7 @@ GET /dispatch/customer/:id/:ack
 	        "customerName": "Customer - no dipatch",
 	        "message": "Dear Voltan,            You have been dispatched as part of the Program \"Funny Games Power Saver \"            Please have your full curtailment plan in effect between the hours            of 08/27/2019 21:00 and 08/27/2019 22:00",
 	        "hasBeenSent": false,
-	        "hasBeenAcknowledged": false,
+	        "hasBeenAcknowledged": true,
 	        "dispatchMeans": "",
 	        "moreInfo": "NO WAY TO SEND DISPATCH TO CUSTOMER Customer - no dipatch",
 	        "createdOn": "Fri, 13 Aug 2021 09:53:50 GMT",
