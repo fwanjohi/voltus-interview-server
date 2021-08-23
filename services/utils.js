@@ -9,7 +9,7 @@ exports.createUUID = function () {
 
 exports.createResponse = function (statusCode, message) {
    return {
-      statusCode: status,
+      statusCode: statusCode,
       message: message
    }
 }

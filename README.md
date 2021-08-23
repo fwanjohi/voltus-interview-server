@@ -105,10 +105,10 @@ GET /program/:id/customers
 ```
 
 ```
-GET /dispatch/customer?cid=abc&status=all|abc*
-	//Eg : http://localhost:3000/program/customer?cid=5&status=all
+GET /dispatch/customer/:id
+	//Eg : http://localhost:3000/dispatch/customer/2
 ```
--   Returns : all new  dispatches sent to a customer
+-   Returns : all  dispatches for a customer, **whether acknowledged or not**
 ```
 	[
 	    {
@@ -136,7 +136,51 @@ GET /dispatch/customer?cid=abc&status=all|abc*
 	        "customerName": "Customer - no dipatch",
 	        "message": "Dear Voltan,            You have been dispatched as part of the Program \"Funny Games Power Saver \"            Please have your full curtailment plan in effect between the hours            of 08/27/2019 21:00 and 08/27/2019 22:00",
 	        "hasBeenSent": false,
+	        "hasBeenAcknowledged": false,
+	        "dispatchMeans": "",
+	        "moreInfo": "NO WAY TO SEND DISPATCH TO CUSTOMER Customer - no dipatch",
+	        "createdOn": "Fri, 13 Aug 2021 09:53:50 GMT",
+	        "acknowledgeOn": "Fri, 13 Aug 2021 09:54:30 GMT",
+	        "acknowledgebBy": "me"
+	    }
+	]
+```
+
+
+```
+GET /dispatch/customer/:id/:ack
+	//Eg : http://localhost:3000/dispatch/customer/2/true
+```
+-   Returns : all  dispatches for a customer **where acknowledge = ack (true|false)**
+- if parameter for ask is in valid, 400 (BAD REQUEST) is returned
+```
+	[
+	    {
+	        "_id": "8e416ba1-596c-4ea9-b4f8-9bed08429630",
+	        "incidentId": "9224ea02-6398-445d-844d-deefa0692993",
+	        "programId": 5,
+	        "programName": "Funny Games Power Saver",
+	        "customerId": 8,
+	        "customerName": "Customer - no dipatch",
+	        "message": "Dear Voltan,            You have been dispatched as part of the Program \"Funny Games Power Saver \"            Please have your full curtailment plan in effect between the hours            of 08/27/2019 21:00 and 08/27/2019 22:00",
+	        "hasBeenSent": false,
 	        "hasBeenAcknowledged": true,
+	        "dispatchMeans": "",
+	        "moreInfo": "NO WAY TO SEND DISPATCH TO CUSTOMER Customer - no dipatch",
+	        "createdOn": "Fri, 13 Aug 2021 09:53:45 GMT",
+	        "acknowledgeOn": "Fri, 13 Aug 2021 09:54:42 GMT",
+	        "acknowledgebBy": "me"
+	    },
+	    {
+	        "_id": "ddb8c35d-b9ac-47a9-9ff9-c8f9407f264a",
+	        "incidentId": "2ad9c147-68f0-4d6d-9e2d-eecc9beb0863",
+	        "programId": 5,
+	        "programName": "Funny Games Power Saver",
+	        "customerId": 8,
+	        "customerName": "Customer - no dipatch",
+	        "message": "Dear Voltan,            You have been dispatched as part of the Program \"Funny Games Power Saver \"            Please have your full curtailment plan in effect between the hours            of 08/27/2019 21:00 and 08/27/2019 22:00",
+	        "hasBeenSent": false,
+	        "hasBeenAcknowledged": false,
 	        "dispatchMeans": "",
 	        "moreInfo": "NO WAY TO SEND DISPATCH TO CUSTOMER Customer - no dipatch",
 	        "createdOn": "Fri, 13 Aug 2021 09:53:50 GMT",

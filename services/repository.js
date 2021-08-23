@@ -261,7 +261,7 @@ exports.createDispatch = function (corId, dispatch) {
 }
 
 /**
- * This is a very critical method. If the DB Log fails, use other means to log the error
+ * This is a very critical method. If the DB Log fails, use other means to log the error (splunk, txtfiles, event logs)
  * @param {*} log the data to be logged
  */
 exports.createDbLog = function (log) {

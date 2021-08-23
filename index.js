@@ -50,8 +50,10 @@ function sendGenericResponse(res, data) {
 
     if (data.statusCode === 500) {
         res.status(500).send("An Error has occured. Please contact your system administrator");
-    } else {
-
+    } else if (data.statusCode === 400) {
+        res.status(400).send(data.message);
+    }
+    else {
         res.status(res.statusCode).send(data.message ?? data);
     }
 }
@@ -134,15 +136,15 @@ gets all dispatch that involve a customer
 id - customer Id
 ack - acknowledged : true||false
  */
-
 app.get('/dispatch/customer/:id/:ack', (req, res) => {
 
     var params = req.params;
     var hasAck = (params.ack.toLowerCase() === 'true' || params.ack.toLowerCase() === 'false');
 
     if (!params.id || !hasAck) {
-        var resp = utils.createResponse(400, "INVALID PARAMETERS")
-        res.status(resp.status).end(resp.message);
+        const val = utils.createResponse(400, "INVALID PARAMETERS")
+        sendGenericResponse(res, val);
+        return;
     }
 
     let custId = parseInt(params.id);
