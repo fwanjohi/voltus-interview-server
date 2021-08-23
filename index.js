@@ -64,7 +64,7 @@ function sendGenericResponse(res, data) {
 app.get('/', (req, res) => {
     const config = getServerConfig()
 
-    let msg = 'Fx-Voltus Dispather Server Running OK...at ' + config.ip + ':' + config.port;
+    let msg = 'Updated Fx-Voltus Dispather Server Running OK...at ' + config.ip + ':' + config.port;
     res.status(200).send(msg);
 
 });
