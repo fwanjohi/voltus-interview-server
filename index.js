@@ -14,6 +14,7 @@ const utils = require('./services/utils');
 const logger = require('./services/logger');
 const cors = require('cors');
 const host = require('os');
+const path = require('path');
 const { config } = require('dotenv');
 
 const app = express();
@@ -27,6 +28,8 @@ app.use(
 
 app.use(express.json())
 app.use(express.static('public'));
+// app.set("views", path.join(__dirname))
+// app.set("view engine", "ejs")
 
 const server = http.createServer(app);
 //const io = require('socket.io')(server);
@@ -40,6 +43,13 @@ const io = require('socket.io')(server, {
 
 var globalSocket;
 
+// app.param('name', function (req, res, next, name) {
+//     const modified = name.toUpperCase();
+
+//     req.name = modified;
+//     next();
+// });
+
 app.get('/', (req, res) => {
     const config = getServerConfig()
 
@@ -49,18 +59,17 @@ app.get('/', (req, res) => {
 
 });
 // get Server API Config
-app.get(, '/config'(req, res) => {
+app.get('/config', (req, res) => {
     const results = getServerConfig();
     res.send(results);
 
 });
 
 //get a specific customer
-app.get('/customer', (req, res) => {
+app.get('/customer/:id', (req, res) => {
 
-    var q = urlParse(req.url, true).query;
-    console.log("url=>", q);
-    var custId = q.cid;
+    console.log("params=>", req.params);
+    var custId = req.params.id;
 
     repository.getCustomerById(custId, (val) => {
         console.log("=================", val);
@@ -69,16 +78,34 @@ app.get('/customer', (req, res) => {
 
 });
 
-//gets all customers involved in a program
-app.get('/program/customer', (req, res) => {
+//gets all a program and all its customers
+app.get('/program/:id/customer', (req, res) => {
 
-    var q = urlParse(req.url, true).query;
+    var params = req.params;
 
-    if (!q || !q.pid) {
+    if (!params || !params.id) {
         res.status(400).end();
     }
 
-    repository.getProgramCustomers(q.pid, (val) => {
+    repository.getProgramCustomers(params.id, (val) => {
+        //console.log("programCustomers", val);
+        res.send(val);
+    });
+
+});
+
+//gets all dispatches for a customer
+app.get('/dispatch/customer/:id', (req, res) => {
+
+    var params = req.params;
+    if (!params || !params.id) {
+        res.status(400).end();
+    }
+
+    let custId = parseInt(params.id);
+    let query = { customerId: custId };
+
+    repository.getDispatchesForCustomer(query, (val) => {
         //console.log("programCustomers", val);
         res.send(val);
     });
@@ -86,31 +113,25 @@ app.get('/program/customer', (req, res) => {
 });
 
 //gets all dispatch that involve a customer
-app.get('/dispatch/customer', (req, res) => {
+//:id - customer Id
+//ack - acknowledged or not
+app.get('/dispatch/customer/:id/:ack', (req, res) => {
 
-    var q = urlParse(req.url, true).query;
-    if (!q || !q.cid) {
-        res.status(400).end();
-        return;
+    var params = req.params;
+    var hasAck = (params.ack.toLowerCase() === 'true' || params.ack.toLowerCase() === 'false');
+
+    if (!params.id || !hasAck) {
+        var resp = utils.createResponse(400, "INVALID PARAMETERS")
+        res.status(resp.status).end(resp.message);
     }
 
-    let custId = parseInt(q.cid)
+    let custId = parseInt(params.id);
 
-    if (!q || !q.status) {
-        res.status(400).end();
-        return;
-    }
-
-    let query = { customerId: custId };
-    if (q.status == 'new') {
-        query.hasBeenAcknowledged = false;
-    }
-
-
+    let query = { customerId: custId, hasBeenAcknowledged: (params.ack.toLowerCase() === 'true') };
 
     repository.getDispatchesForCustomer(query, (val) => {
         //console.log("programCustomers", val);
-        res.send(val);
+        res.status(200).end(val);
     });
 
 });
@@ -201,6 +222,10 @@ io.on('connection', (socket) => {
         });
     });
 })
+
+function sendResponse(res, data) {
+    res.status(data.statusCode).end(data.message);
+}
 
 function getServerConfig() {
     const { networkInterfaces } = require('os');

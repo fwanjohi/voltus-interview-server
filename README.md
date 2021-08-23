@@ -59,9 +59,9 @@ ng serve
 
 #### Methods (REST API)
 ```
-GET /customer?cid=abc
+GET /customer/:id
 ```
--	Returns a customer by id= 'abc',
+-	Returns a customer by
 
 ```
 GET /config (This is only for internal use to use with external tools like Post Man)
@@ -80,13 +80,13 @@ GET /config (This is only for internal use to use with external tools like Post 
 	}
 ```
 ```
-GET /program/customer
+GET /program/:id/customers
 	// Eg : http://localhost:3000/program/customer?pid=5
 ```
 
 -   Returns : all customers under a particular Voltus Program as json
 ```
-	http://localhost:3000/program/customer?pid=5
+	http://localhost:3000/program/5/customer
 	{
 	    "_id": 5,
 	    "name": "Funny Games Power Saver",
