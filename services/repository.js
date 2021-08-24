@@ -224,6 +224,8 @@ exports.createNewIncident = function (corId, incident, callBack) {
         const dbo = db.db(dbName);
         incident.createdOn = new Date().toUTCString();
         incident._id = utils.createUUID();
+        incident.correlationId = corId;
+
         dbo.collection("incidents").insertOne(incident, function (err, res) {
             if (err) {
                 Logger.logError(corId, error);

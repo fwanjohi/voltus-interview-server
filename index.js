@@ -151,7 +151,7 @@ app.get('/dispatch/customer/:id/:ack', (req, res) => {
 
     let query = { customerId: custId, hasBeenAcknowledged: (params.ack.toLowerCase() === 'true') };
 
-    repository.getDispatchesForCustomer(query, (val) => {
+    repository.getDispatchesForCustomer({ query }, (val) => {
         //console.log("programCustomers", val);
         sendGenericResponse(res, val);
     });
@@ -174,11 +174,19 @@ app.post('/incident', (req, res) => {
         sendGenericResponse(res, val);
 
         if (globalSocket) {
-            //to all other clients
-            globalSocket.broadcast.emit('new-dispatch', ack);
 
-            // to sender
-            globalSocket.emit('new-dispatch', ack);
+            repository.getDispatchesForCustomer({ hasBeenAcknowledged: false }, (created) => {
+                console.log('sending new dispatches=====', created);
+
+                for (let x = 0; x < created.length; x++) {
+                    globalSocket.broadcast.emit('new-dispatch', created[x]);
+                    // to sender
+                    //globalSocket.emit('new-dispatch', created[x]);
+                }
+
+            });
+            //to all other clients
+
         }
     });
 });

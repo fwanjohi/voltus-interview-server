@@ -17,10 +17,12 @@ exports.dispatchIncident = function (correlationId, incident) {
             Please have your full curtailment plan in effect between the hours\
             of ' + incident.start_time + " and " + incident.end_time;
 
+            let dispItems = [];
+
             let dispatch = {
-                
+
                 incidentId: incident._id,
-                programId : incident.program_id,
+                programId: incident.program_id,
                 programName: prog.name,
                 customerId: customer._id,
                 customerName: customer.name,
@@ -29,46 +31,50 @@ exports.dispatchIncident = function (correlationId, incident) {
                 hasBeenAcknowledged: false,
                 dispatchMeans: "",
                 moreInfo: "",
-                createdOn: new Date().toUTCString(),               
+                createdOn: new Date().toUTCString(),
             }
-           
+
 
             if (customer.dispatchTypes) {
-               
+
+
                 for (let d = 0; d < customer.dispatchTypes.length; d++) {
                     dispType = customer.dispatchTypes[d];
                     if (dispType == 1) { // email
-                        console.log('EMAIL DISPATCH SENT TO :' + customer.name + "on email: " + customer.email);
+                        dispItems.push('EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email);
                         sent = true;
-                        dispatch.dispatchMeans += "email ";
+                        dispatch.dispatchMeans += "email, ";
                     }
 
                     if (dispType == 2) { // Text
-                        console.log('TEXT MESSAGE: sent to :' + customer.name + "on phon number: " + customer.phone);
+                        dispItems.push('TEXT MESSAGE: sent to :' + customer.name + " on phon number: " + customer.phone);
                         sent = true;
-                        dispatch.dispatchMeans += "Text ";
+                        dispatch.dispatchMeans += "Text, ";
                     }
 
                     if (dispType == 3) { // Broadcast
-                        console.log('Socket Broadcast Sent to : ' + customer.name);
-                        dispatch.dispatchMeans += "Web Socket Broadcast ";
+                        dispItems.push('Socket Broadcast Sent to : ' + customer.name);
+                        dispatch.dispatchMeans += "Web Socket Broadcast, ";
                         sent = true;
                     }
-                   
+
                 }
             }
-            let moreInfo = sent 
-              ?  "Customer " + customer.name + ' has been informed about ' + prog.name
-              :  "NO WAY TO SEND DISPATCH TO CUSTOMER " + customer.name;
+            let moreInfo = sent
+                ? "Customer " + customer.name + ' has been informed about ' + prog.name
+                : "NO WAY TO SEND DISPATCH TO CUSTOMER " + customer.name;
 
             dispatch.moreInfo = moreInfo;
+            dispatch.dispatchItems = dispItems;
             dispatch.hasBeenSent = sent;
+
             repository.createDispatch(correlationId, dispatch);
 
-            let log = { 
-                datalogType : "dispatch",
+            let log = {
+                datalogType: "dispatch",
                 id: incident._id,
-                data: moreInfo
+                data: moreInfo,
+                dispatchItems: dispItems
             }
 
             logger.logAudit(correlationId, log);
