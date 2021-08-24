@@ -12,7 +12,7 @@ exports.dispatchIncident = function (correlationId, incident) {
         for (let x = 0; x < customers.length; x++) {
 
             let customer = customers[x];
-            let sent = false;
+            let sent = 0;
             let msg = 'Dear Voltan,\
             You have been dispatched as part of the Program "' + prog.name + ' "\
             Please have your full curtailment plan in effect between the hours\
@@ -43,21 +43,28 @@ exports.dispatchIncident = function (correlationId, incident) {
                     dispType = customer.dispatchTypes[d];
                     if (dispType == 1) { // email
 
-                        const dispatchOptions = {
+                        let dispatchOptions = {
                             to: customer.email,
                             subject: 'Dispatch from ' + dispatch.programName,
                             message: dispatch.message
                         };
 
-                        mailer.sendEmail(dispatchOptions, (err) => {
+                        mailer.sendEmail(dispatchOptions, (err, success) => {
                             if (err) {
                                 dispItems.push('ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email);
-                                sent = false;
                                 dispatch.dispatchMeans += "email - Failed,";
+                                dispatchOptions.error = 'ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email;
+                                dispatchOptions.stack = err;
+                                logger.logError(correlationId, dispatchOptions);
+
                             } else {
                                 dispItems.push('EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email);
-                                sent = true;
+
                                 dispatch.dispatchMeans += "email, ";
+                                dispatchOptions.emailData = success;
+                                logger.logAudit(correlationId, success);
+                                sent++;
+
                             }
 
                         });
@@ -65,25 +72,25 @@ exports.dispatchIncident = function (correlationId, incident) {
 
                     if (dispType == 2) { // Text
                         dispItems.push('TEXT MESSAGE: sent to :' + customer.name + " on phone number: " + customer.phone);
-                        sent = true;
+                        sent++;
                         dispatch.dispatchMeans += "Text, ";
                     }
 
                     if (dispType == 3) { // Broadcast
                         dispItems.push('Socket Broadcast Sent to : ' + customer.name);
                         dispatch.dispatchMeans += "Web Socket Broadcast, ";
-                        sent = true;
+                        sent++;
                     }
 
                 }
             }
-            let moreInfo = sent
+            let moreInfo = sent >= 0
                 ? "Customer " + customer.name + ' has been informed about ' + prog.name
                 : "NO WAY TO SEND DISPATCH TO CUSTOMER " + customer.name;
 
             dispatch.moreInfo = moreInfo;
             dispatch.dispatchItems = dispItems;
-            dispatch.hasBeenSent = sent;
+            dispatch.hasBeenSent = sent > 0;
 
             repository.createDispatch(correlationId, dispatch);
 

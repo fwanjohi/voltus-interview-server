@@ -4,8 +4,6 @@ const nodemailer = require('nodemailer');
 const user = 'fxi.innovator@gmail.com';
 const pwd = 'fxitester';
 
-
-
 exports.sendEmail = function (dispatchOptions, callback) {
     //console.log('sending mail ====>', dispatchOptions);
     var transporter = nodemailer.createTransport({
@@ -30,11 +28,13 @@ exports.sendEmail = function (dispatchOptions, callback) {
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log("Error Sending Dispatch Email", error);
-            callback(error);
+
         } else {
             console.log("SUCCESS", info);
             console.log('Email sent: ' + info.response);
+
         }
+        callback(error, info);
     });
 
 }
