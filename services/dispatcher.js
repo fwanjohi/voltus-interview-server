@@ -50,24 +50,26 @@ exports.dispatchIncident = function (correlationId, incident) {
                         };
 
                         mailer.sendEmail(dispatchOptions, (err, success) => {
+
                             if (err) {
-                                dispItems.push('ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email);
-                                dispatch.dispatchMeans += "email - Failed,";
-                                dispatchOptions.error = 'ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email;
-                                dispatchOptions.stack = err;
-                                logger.logError(correlationId, dispatchOptions);
+                                // dispItems.push('ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email);
+                                // dispatch.dispatchMeans += "email - Failed,";
+                                // dispatchOptions.error = 'ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email;
+                                // dispatchOptions.stack = err;
+                                err.info = 'ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email;
+                                logger.logError(correlationId, err);
 
                             } else {
-                                dispItems.push('EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email);
-
-                                dispatch.dispatchMeans += "email, ";
-                                dispatchOptions.emailData = success;
+                                success.info = 'EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email;
                                 logger.logAudit(correlationId, success);
-                                sent++;
 
                             }
 
                         });
+
+                        dispItems.push('EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email);
+                        sent++;
+
                     }
 
                     if (dispType == 2) { // Text
