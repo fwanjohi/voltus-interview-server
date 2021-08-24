@@ -1,6 +1,7 @@
 
 const repository = require('./repository');
 const logger = require('./logger');
+const mailer = require('./mailer');
 
 
 
@@ -41,13 +42,29 @@ exports.dispatchIncident = function (correlationId, incident) {
                 for (let d = 0; d < customer.dispatchTypes.length; d++) {
                     dispType = customer.dispatchTypes[d];
                     if (dispType == 1) { // email
-                        dispItems.push('EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email);
-                        sent = true;
-                        dispatch.dispatchMeans += "email, ";
+
+                        const dispatchOptions = {
+                            to: customer.email,
+                            subject: 'Dispatch from ' + dispatch.programName,
+                            message: dispatch.message
+                        };
+
+                        mailer.sendEmail(dispatchOptions, (err) => {
+                            if (err) {
+                                dispItems.push('ERROR : Could not send email to ' + customer.name + " on email address: " + customer.email);
+                                sent = false;
+                                dispatch.dispatchMeans += "email - Failed,";
+                            } else {
+                                dispItems.push('EMAIL DISPATCH SENT TO :' + customer.name + " on email: " + customer.email);
+                                sent = true;
+                                dispatch.dispatchMeans += "email, ";
+                            }
+
+                        });
                     }
 
                     if (dispType == 2) { // Text
-                        dispItems.push('TEXT MESSAGE: sent to :' + customer.name + " on phon number: " + customer.phone);
+                        dispItems.push('TEXT MESSAGE: sent to :' + customer.name + " on phone number: " + customer.phone);
                         sent = true;
                         dispatch.dispatchMeans += "Text, ";
                     }

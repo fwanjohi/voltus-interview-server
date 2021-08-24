@@ -25,14 +25,14 @@ exports.createCustomers = function () {
             if (!result) {
 
                 const customers = [
-                    { _id: 1, name: 'Keroche Wine', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 1, dispatchTypes: [1, 2, 3] },
-                    { _id: 2, name: 'Tyson Food', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 1, dispatchTypes: [1, 2, 3] },
-                    { _id: 3, name: 'Wallmart SF HQ', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 2, dispatchTypes: [1, 2, 3, 4] },
-                    { _id: 4, name: 'Amazon Wareshouse', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 2, dispatchTypes: [1, 2, 3] },
-                    { _id: 5, name: 'Bacon Steal Meals', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 3, dispatchTypes: [1, 2, 3] },
-                    { _id: 6, name: 'Simba Jungle Food Produceee', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 3, dispatchTypes: [1, 2, 3] },
-                    { _id: 7, name: 'Walmart4', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 4, dispatchTypes: [1, 2, 3] },
-                    { _id: 8, name: 'Customer - no dipatch', address: 'Highway 71', phone: '+16173086055', email: 'fwangohi@gmail.com', programId: 5, dispatchTypes: [] },
+                    { _id: 1, name: 'Keroche Wine', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 1, dispatchTypes: [1, 2, 3] },
+                    { _id: 2, name: 'Tyson Food', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 1, dispatchTypes: [1, 2, 3] },
+                    { _id: 3, name: 'Wallmart SF HQ', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 2, dispatchTypes: [1, 2, 3, 4] },
+                    { _id: 4, name: 'Amazon Wareshouse', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 2, dispatchTypes: [1, 2, 3] },
+                    { _id: 5, name: 'Bacon Steal Meals', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 3, dispatchTypes: [1, 2, 3] },
+                    { _id: 6, name: 'Simba Jungle Food Produceee', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 3, dispatchTypes: [1, 2, 3] },
+                    { _id: 7, name: 'Walmart4', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 4, dispatchTypes: [1, 2, 3] },
+                    { _id: 8, name: 'Customer - no dipatch', address: 'Highway 71', phone: '+16173086055', email: 'fwanjohi@gmail.com', programId: 5, dispatchTypes: [] },
                 ];
 
                 dbo.collection("customers").insertMany(customers, function (err, res) {
