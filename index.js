@@ -1,6 +1,3 @@
-// const express = require('express');
-
-// const app = express();
 
 const port = process.env.PORT || '3000';
 
@@ -31,6 +28,7 @@ app.use(express.json())
 app.use(express.static('public'));
 
 const server = http.createServer(app);
+var globalSocket;
 
 const io = require('socket.io')(server, {
     cors: {
@@ -39,7 +37,6 @@ const io = require('socket.io')(server, {
     },
 });
 
-var globalSocket;
 
 /**
  * 
@@ -208,8 +205,8 @@ server.listen(port, () => {
 
     console.log(`listening at http://localhost:${port}`);
     console.log("checking repository");
-    repository.createCustomers();
-    repository.createPrograms();
+    //repository.createCustomers();
+    //repository.createPrograms();
 });
 
 
